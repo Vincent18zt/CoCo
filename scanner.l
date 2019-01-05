@@ -1,72 +1,124 @@
 %{
-#include "scanner.h"
-int COMMENT = 0;
+#include "y.tab.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "tree.h"
+#include <cstring>
+#define YYTYPE char*
+#pragma warning (disable : 4996)
+
 %}
-identifier [[:alpha:]_][[:alnum:]_]*
+%option yylineno
+VOID void
+MAIN main
+INT int
+CHAR char
+FLOAT float
+DOUBLE double
+ASSIGN =
+IF if
+ELSE else
+WHILE while
+FOR for
+BREAK break
+CONTINUE continue
+PLUS \+
+DPLUS \+\+
+MINUS \-
+DMINUS \-\-
+MUL \*
+DIV \/
+MOD \%
+BITOR \|
+BITAND \&
+BITXOR \^
+EG \>=
+EL \<=
+EQ ==
+EN !=
+BITLEFT \<\<
+BITRIGHT \>\>
+GT \>
+LT \<
+AND \&\&
+OR \|\|
+NOT !
+LP \(
+RP \)
+LC \{
+RC \}
+RETURN return
+COMMA ,
+SQM ;
+COMMENT \/\/(.*){DELIM}*$
+COMMENTS "/*"(([^\*]*(\*[^\/])?)*)"*/"
+DELIM [ \t\r]
+NEWLINE \n
+WHITESPACE {DELIM}+
+LETTER [a-zA-Z]
+DIGIT [0-9]
+INTEGER_VALUE ([1-9]{DIGIT}*|0)
+FLOAT_VALUE {DOUBLE_VALUE}(f|F)
+DOUBLE_VALUE ({DIGIT}*\.{DIGIT}*)|({INTEGER_VALUE}(e|E)-?{INTEGER_VALUE})
+CHAR_VALUE \'.\'
+STRING_VALUE \"(.*)\"
+READ read
+WRITE write
+ID (_|{LETTER})(_|{LETTER}|{DIGIT})*
 %%
-#.* {return PRE;}
-const {if(!COMMENT) return CONST;}
-continue {if(!COMMENT) return CONTINUE;}
-default {if(!COMMENT) return DEFAULT;}
-do {if(!COMMENT) return DO;}
-else {if(!COMMENT) return ELSE;}
-extern {if(!COMMENT) return EXTERN;}
-goto {if(!COMMENT) return GOTO;}
-if {if(!COMMENT) return IF;}
-register {if(!COMMENT) return REGISTER;}
-return {if(!COMMENT) return RETURN;}
-signed {if(!COMMENT) return SIGNED;}
-sizeof {if(!COMMENT) return SIZEOF;}
-static {if(!COMMENT) return STATIC;}
-switch {if(!COMMENT) return SWITCH;}
-typedef {if(!COMMENT) return TYPEDEF;}
-unsigned {if(!COMMENT) return UNSIGNED;}
-volatile {if(!COMMENT) return VOLATILE;}
-while {if(!COMMENT) return KEYWORD;}
-auto {if(!COMMENT) return AUTO;}
-break {if(!COMMENT) return BREAK;}
-case {if(!COMMENT) return CASE;}
-void {if(!COMMENT) return VOID;}
-main {if(!COMMENT) return MAIN;}
-float {if(!COMMENT) return TYPE;}
-char {if(!COMMENT) return TYPE;}
-int {if(!COMMENT) return TYPE;}
-long {if(!COMMENT) return TYPE;}
-enum {if(!COMMENT) return TYPE;}
-struct {if(!COMMENT) return TYPE;}
-union {if(!COMMENT) return TYPE;}
-short {if(!COMMENT) return TYPE;}
-double {if(!COMMENT) return TYPE;}
-for {if(!COMMENT) return FOR;}
-"/*" {COMMENT = 1;}
-"*/" {COMMENT = 0;}
-{identifier}(\[[0-9]*\])? {if(!COMMENT) return ID;}
-\".*\" {if(!COMMENT) return STR;}
-[0-9]+ {if(!COMMENT) return NUMBER;}
-[[:space:]]+ {}
-\( {if(!COMMENT) return LP;}
-\) {if(!COMMENT) return RP;}
-\{ {if(!COMMENT) return LBRACE;}
-\} {if(!COMMENT) return RBRACE;}
-\; {if(!COMMENT) return SEMICOLON;}
-\= {if(!COMMENT) return ASSIGN;}
-\< {if(!COMMENT) return LESS;}
-\+ {if(!COMMENT) return ADD;}
-\- {if(!COMMENT) return SUB;}
-\* {if(!COMMENT) return MUL;}
-\/ {if(!COMMENT) return DIV;}
-\% {if(!COMMENT) return MOD;}
-\! {if(!COMMENT) return NOT;}
-\<= {if(!COMMENT) return LE;}
-\>= {if(!COMMENT) return ME;}
-\== {if(!COMMENT) return EE;}
-\& {if(!COMMENT) return AND;}
-\? {if(!COMMENT) return QST;}
-\> {if(!COMMENT) return OP;}
-\, {if(!COMMENT) return COM;}
-\[ {if(!COMMENT) return OB;}
-\] {if(!COMMENT) return CB;}
+
+
+{MAIN} {return MAIN;}
+{INT} {return INT;}
+{VOID} {return VOID;}
+{FLOAT} {return FLOAT;}
+{DOUBLE} {return DOUBLE;}
+{CHAR} {return CHAR;}
+{ASSIGN} {return ASSIGN;}
+{IF} {return IF;}
+{ELSE} {return ELSE;}
+{WHILE} {return WHILE;}
+{PLUS} {return PLUS;}
+{MINUS} {return MINUS;}
+{FOR} {return FOR;}
+{MUL} {return MUL;}
+{DIV} {return DIV;}
+{EG} {return EG;}
+{EL} {return EL;}
+{EQ} {return EQ;}
+{BITLEFT} {return BITLEFT;}
+{BITRIGHT} {return BITRIGHT;}
+{GT} {return GT;}
+{LT} {return LT;}
+{AND} {return AND;}
+{OR} {return OR;}
+{NOT} {return NOT;}
+{LP} {return LP;}
+{RP} {return RP;}
+{LC} {return LC;}
+{RC} {return RC;}
+{RETURN} {return RETURN;}
+{COMMA} {return COMMA;}
+{SQM} {return SQM;}
+{MOD} {return MOD;}
+{BITAND} {return BITAND;}
+{BITOR} {return BITOR;}
+{BITXOR} {return BITXOR;}
+{READ} {return READ;}
+{WRITE} {return WRITE;}
+{EN} {return EN;}
+{DPLUS} {return DPLUS;}
+{DMINUS} {return DMINUS;}
+{ID} {yylval.str = new char[strlen(yytext)];strcpy(yylval.str, yytext); return ID;}
+{INTEGER_VALUE} {yylval.str = new char[strlen(yytext)]; strcpy(yylval.str, yytext); return INTEGER_VALUE;}
+{FLOAT_VALUE} {yylval.str = new char[strlen(yytext)]; strcpy(yylval.str, yytext); return FLOAT_VALUE;}
+{CHAR_VALUE} {yylval.str = new char[strlen(yytext)]; strcpy(yylval.str, yytext); return CHAR_VALUE;}
+{DOUBLE_VALUE} {yylval.str = new char[strlen(yytext)]; strcpy(yylval.str, yytext); return DOUBLE_VALUE;}
+{COMMENT} {yylval.str = new char[strlen(yytext)]; strcpy(yylval.str, yytext); return COMMENT;}
+{COMMENTS} {y1ylval.str = new char[strlen(yytext)]; strcpy(yylval.str, yytext); return COMMENTS;}
+
 %%
-int yywrap(void) {
-    return 1;
+int yywrap(void)
+{
+ return 1;
 }
