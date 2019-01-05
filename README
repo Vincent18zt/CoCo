@@ -1,3 +1,9 @@
 $ make
 
 input, output file needed, see parser.y
+
+Features:
+1. Parse Tree Print
+2. Error Detection
+3. Three Address Code Print
+4. x86 Assembly Code Print
